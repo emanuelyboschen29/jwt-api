@@ -1,5 +1,6 @@
 const { Reader, Loan, Book } = require('../models');
 const { erro } = require('../utils/erro');
+const { Op } = require('sequelize');
 
 const CAMPOS = ['name', 'cpf', 'email', 'phone'];
 
@@ -22,6 +23,17 @@ const readerService = {
     // GET /v1/readers/:id/loans (histórico do leitor)
     loans: async (id) => {
         await readerService.findById(id);
+        await Loan.update(
+            { status: 'ATRASADO' },
+            {
+                where: {
+                    readerId: id,
+                    status: 'ATIVO',
+                    dueDate: { [Op.lt]: new Date() },
+                    returnDate: null
+                }
+            }
+        );
         const loans = await Loan.findAll({
             where: { readerId: id },
             include: [Book],

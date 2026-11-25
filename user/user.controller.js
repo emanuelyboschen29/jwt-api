@@ -38,6 +38,20 @@ const userController = {
         } catch (error) {
             res.status(400).json({ error: error.message });
         }
+    },
+    update: async (req, res) => {
+        try {
+            res.json(await userService.update(req.params.id, req.body));
+        } catch (error) {
+            res.status(error.status || 400).json({ error: error.message });
+        }
+    },
+    updateActive: async (req, res) => {
+        try {
+            res.json(await userService.updateActive(req.params.id, req.body.active));
+        } catch (error) {
+            res.status(error.status || 400).json({ error: error.message });
+        }
     }
 };
 

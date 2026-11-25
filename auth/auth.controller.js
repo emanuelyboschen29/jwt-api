@@ -27,6 +27,24 @@ const authController = {
         } catch (error) {
             res.status(401).json({ error: error.message });
         }
+    },
+
+    async logout(req, res) {
+        try {
+            const { refreshToken } = req.body;
+            await authService.logout(refreshToken);
+            res.json({ message: 'Logout realizado com sucesso.' });
+        } catch (error) {
+            res.status(401).json({ error: error.message });
+        }
+    },
+
+    async me(req, res) {
+        try {
+            res.json(await authService.me(req.user.id));
+        } catch (error) {
+            res.status(404).json({ error: error.message });
+        }
     }
 };
 

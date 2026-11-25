@@ -1,3 +1,3 @@
-JWT_SECRET=zI4VKV1v8ytQ
-JWT_REFRESH_SECRET=dJnLoPOWaMdW
+JWT_SECRET=troque-por-uma-chave-grande-e-aleatoria
+JWT_REFRESH_SECRET=outra-chave-diferente-da-primeira
 PORT=3000

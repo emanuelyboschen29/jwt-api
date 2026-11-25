@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
+const User = require('../user/user.model');
 
 // confere se a requisição tem um access token válido
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
     if (!token) {
@@ -10,6 +11,11 @@ const authMiddleware = (req, res, next) => {
 
     try {
         req.user = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findByPk(req.user.id);
+        if (!user || user.active === false) {
+            return res.status(401).json({ error: 'User is inactive.' });
+        }
+        req.user.isAdmin = user.isAdmin;
         next();
     } catch (error) {
         res.status(401).json({ error: 'Invalid or expired token.' });

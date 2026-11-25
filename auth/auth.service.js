@@ -8,7 +8,7 @@ const RefreshToken = require('./refreshToken.model');
 const generateAccessToken = (user) => jwt.sign(
     { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin },
     process.env.JWT_SECRET,
-    { expiresIn: '60m' }
+    { expiresIn: '15m' }
 );
 
 // gera o refresh token (7 dias) e salva no banco
@@ -68,10 +68,20 @@ const authService = {
             throw new Error('Invalid or expired refresh token');
         }
 
+        if (stored.userId !== decoded.id) {
+            throw new Error('Invalid refresh token');
+        }
+
         // token já usado sendo reutilizado: revoga todos os tokens do usuário
         if (stored.revoked) {
             await RefreshToken.update({ revoked: true }, { where: { userId: stored.userId } });
             throw new Error('Refresh token reuse detected');
+        }
+
+        if (stored.expiresAt <= new Date()) {
+            stored.revoked = true;
+            await stored.save();
+            throw new Error('Invalid or expired refresh token');
         }
 
         const user = await User.findByPk(decoded.id);

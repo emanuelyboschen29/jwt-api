@@ -62,8 +62,25 @@ router.post('/', async (req, res) => {
             return res.status(409).json({ error: 'Não há exemplares disponíveis deste livro.' });
         }
 
+        await Loan.update(
+            { status: 'ATRASADO' },
+            {
+                where: {
+                    readerId,
+                    status: 'ATIVO',
+                    dueDate: { [Op.lt]: new Date() },
+                    returnDate: null
+                },
+                transaction
+            }
+        );
+
         const activeLoans = await Loan.count({
-            where: { readerId, status: ['ATIVO', 'ATRASADO'] },
+            where: {
+                readerId,
+                status: { [Op.in]: ['ATIVO', 'ATRASADO'] },
+                returnDate: null
+            },
             transaction
         });
         if (activeLoans >= 3) {
@@ -126,10 +143,12 @@ router.patch('/:id/return', async (req, res) => {
 
         const today = new Date();
         let fine = 0;
-        if (today > new Date(loan.dueDate)) {
+        const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const due = new Date(loan.dueDate);
+        const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+        if (todayDay > dueDay) {
             const millisecondsPerDay = 24 * 60 * 60 * 1000;
-            const overdueDays = Math.ceil((today - new Date(loan.dueDate)) / millisecondsPerDay);
-            fine = overdueDays;
+            fine = Math.floor((todayDay - dueDay) / millisecondsPerDay);
         }
 
         await loan.update({

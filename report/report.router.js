@@ -26,10 +26,26 @@ router.get('/dashboard', authMiddleware, isAdmin, async (req, res) => {
         const pendingLoans = await Loan.findAll({
             where: { status: ['ATIVO', 'ATRASADO'], returnDate: null }
         });
+        const returnedLoans = await Loan.findAll({
+            where: { status: 'DEVOLVIDO', returnDate: { [Op.ne]: null } }
+        });
 
         const totalBooks = books.reduce((sum, book) => sum + book.totalCopies, 0);
         const availableCopies = books.reduce((sum, book) => sum + book.availableCopies, 0);
         const pendingFines = overdueLoans;
+        const projectedFine = pendingLoans
+            .filter((loan) => loan.status === 'ATRASADO')
+            .reduce((sum, loan) => {
+                const today = new Date();
+                const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                const due = new Date(loan.dueDate);
+                const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+                const days = todayDay > dueDay
+                    ? Math.floor((todayDay - dueDay) / (24 * 60 * 60 * 1000))
+                    : 0;
+                return sum + days;
+            }, 0);
+        const totalFines = projectedFine + returnedLoans.reduce((sum, loan) => sum + (loan.fine || 0), 0);
 
         res.json({
             totalBooks,
@@ -38,7 +54,7 @@ router.get('/dashboard', authMiddleware, isAdmin, async (req, res) => {
             activeLoans,
             borrowedBooks: pendingLoans.length,
             overdueLoans,
-            totalFines: pendingLoans.reduce((sum, loan) => sum + (loan.fine || 0), 0),
+            totalFines,
             pendingFines
         });
     } catch (error) {
