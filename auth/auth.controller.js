@@ -1,23 +1,31 @@
+
 const authService = require('./auth.service');
 
 const authController = {
+
     async login(req, res) {
         try {
             const { email, password } = req.body;
-            const token = await authService.login(email, password);
-            res.json({ token });
+
+            const tokens = await authService.login(email, password);
+
+            res.json(tokens);
+
         } catch (error) {
             res.status(401).json({ error: error.message });
         }
     },
 
-    async logout(req, res) {
+    async refresh(req, res) {
         try {
-            const token = req.headers.authorization.split(' ')[1];
-            await authService.logout(token);
-            res.json({ message: 'Logout successful' });
+            const { refreshToken } = req.body;
+
+            const tokens = await authService.refresh(refreshToken);
+
+            res.json(tokens);
+
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            res.status(401).json({ error: error.message });
         }
     }
 };

@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const { DataTypes } = require('sequelize');
+
 const User = db.define('User', {
     name: {
         type: DataTypes.STRING,
@@ -11,7 +12,7 @@ const User = db.define('User', {
         unique: true
     },
     isAdmin: {
-        type: DataTypes.BOOLEAN, // Define the isAdmin field with a boolean data type
+        type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false
     },
@@ -23,6 +24,11 @@ const User = db.define('User', {
     password: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true
     }
 });
 
