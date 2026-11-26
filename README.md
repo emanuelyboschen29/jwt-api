@@ -81,6 +81,14 @@ npm test
 
 Os testes cobrem autenticação, permissões, empréstimos, estoque, devoluções, multas, exclusões vinculadas e desativação de usuários.
 
-## Postman
+## Thunder Client
 
-Importe `jwt-api.postman_collection.json` no Postman para ver exemplos de chamadas.
+Importe `thunder-client-collection.json` no Thunder Client:
+
+1. Abra a aba **Thunder Client** no VS Code.
+2. Entre em **Collections**, abra o menu e selecione **Import**.
+3. Escolha `thunder-client-collection.json`.
+4. Faça login em **Auth > Login**. Copie os valores de `accessToken` e `refreshToken` da resposta.
+5. Nas variáveis da coleção, atualize `accessToken` e `refreshToken` para usar as demais requisições.
+
+O arquivo usa o formato de coleção Postman 2.1, que é aceito pelo importador do Thunder Client.
